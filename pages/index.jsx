@@ -44,6 +44,27 @@ export default function Home(props){
   )
 } 
 
+export async function getServerSideProps(){
+  let provider;
+  if (process.env.ENVIRONMENT === 'local') {
+    provider = new ethers.providers.JsonRpcProvider()
+  } else if (process.env.ENVIRONMENT === 'testnet') {
+    provider = new ethers.providers.JsonRpcProvider('https://rpc-mumbai.matic.today')
+  } else {
+    provider = new ethers.providers.JsonRpcProvider('https://polygon-rpc.com/')
+  }
+
+  const contract = new ethers.Contract(contractAddress, Blog.abi, provider);
+
+  const data = await contract.fetchPosts()
+  return {
+    props: {
+      posts: JSON.parse(JSON.stringify(data))
+    }
+  }
+
+}
+
 const arrowContainer = css`
   display: flex;
   flex: 1;
