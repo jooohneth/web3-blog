@@ -29,4 +29,55 @@ contract Blog {
         name = _name;
         owner = msg.sender;
     }
+
+    function updateName(string memory _name) public {
+        name = _name;
+    }
+
+    function transferOwnership(address newOwner) public onlyOwner {
+        owner = newOwner;
+    }
+
+    function fetchPost(string memory hash) public view returns(Post memory){
+      return hashToPost[hash];
+    }
+
+    function createPost(string memory title, string memory hash) public onlyOwner {
+        _postIds.increment();
+        uint postId = _postIds.current();
+        Post storage post = idToPost[postId];
+        post.id = postId;
+        post.title = title;
+        post.published = true;
+        post.content = hash;
+        hashToPost[hash] = post;
+        emit PostCreated(postId, title, hash);
+    }
+
+    function updatePost(uint postId, string memory title, string memory hash, bool published) public onlyOwner {
+        Post storage post =  idToPost[postId];
+        post.title = title;
+        post.published = published;
+        post.content = hash;
+        idToPost[postId] = post;
+        hashToPost[hash] = post;
+        emit PostUpdated(post.id, title, hash, published);
+    }
+
+    function fetchPosts() public view returns (Post[] memory) {
+        uint itemCount = _postIds.current();
+
+        Post[] memory posts = new Post[](itemCount);
+        for (uint i = 0; i < itemCount; i++) {
+            uint currentId = i + 1;
+            Post storage currentItem = idToPost[currentId];
+            posts[i] = currentItem;
+        }
+        return posts;
+    }
+
+    modifier onlyOwner() {
+      require(msg.sender == owner);
+    _;
+  }
 }
