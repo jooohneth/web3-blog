@@ -44,3 +44,56 @@ export default function Home(props){
   )
 } 
 
+const arrowContainer = css`
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
+  padding-right: 20px;
+`
+
+const postTitle = css`
+  font-size: 30px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 0;
+  padding: 20px;
+`
+
+const linkStyle = css`
+  border: 1px solid #ddd;
+  margin-top: 20px;
+  border-radius: 8px;
+  display: flex;
+`
+
+const postList = css`
+  width: 700px;
+  margin: 0 auto;
+  padding-top: 50px;  
+`
+
+const container = css`
+  display: flex;
+  justify-content: center;
+`
+
+const buttonStyle = css`
+  margin-top: 100px;
+  background-color: #fafafa;
+  outline: none;
+  border: none;
+  font-size: 44px;
+  padding: 20px 70px;
+  border-radius: 15px;
+  cursor: pointer;
+  box-shadow: 7px 7px rgba(0, 0, 0, .1);
+`
+
+const arrow = css`
+  width: 35px;
+  margin-left: 30px;
+`
+
+const smallArrow = css`
+  width: 25px;
+`
