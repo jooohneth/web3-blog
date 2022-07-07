@@ -7,6 +7,12 @@ import { AccountContext } from '../context';
 import { contractAddress, ownerAddress } from '../config';
 import Blog from "../artifacts/contracts/Blog.sol/Blog.json";
 
-export default function Home(){
-  
+export default function Home(props){
+  const {posts} = props;
+  const account = useContext(AccountContext);
+  const router = useRouter();
+
+  async function navigate(){
+    router.push("/create-post");
+  }
 } 
