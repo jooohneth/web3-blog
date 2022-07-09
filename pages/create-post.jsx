@@ -27,7 +27,7 @@ function CreatePost() {
       setLoaded(true)
     }, 500)
   }, [])
-}
+
 
 function onChange(e) {
     setPost(() => ({ ...post, [e.target.name]: e.target.value }))
@@ -76,4 +76,50 @@ function onChange(e) {
     setImage(uploadedFile)
   }
 
+  return (
+    <div className={container}>
+      {
+        image && (
+          <img className={coverImageStyle} src={URL.createObjectURL(image)} />
+        )
+      }
+      <input
+        onChange={onChange}
+        name='title'
+        placeholder='Give it a title ...'
+        value={post.title}
+        className={titleStyle}
+      />
+      <SimpleMDE
+        className={mdEditor}
+        placeholder="What's on your mind?"
+        value={post.content}
+        onChange={value => setPost({ ...post, content: value })}
+      />
+      {
+        loaded && (
+          <>
+            <button
+              className={button}
+              type='button'
+              onClick={createNewPost}
+            >Publish</button>
+            <button
+              onClick={triggerOnChange}
+              className={button}
+            >Add cover image</button>
+          </>
+        )
+      }
+      <input
+        id='selectImage'
+        className={hiddenInput} 
+        type='file'
+        onChange={handleFileChange}
+        ref={fileRef}
+      />
+    </div>
+  )
+
+} 
 export default CreatePost
