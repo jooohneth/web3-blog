@@ -15,66 +15,63 @@ const SimpleMDE = dynamic(
     { ssr: false }
   )
 
-function Post(){
-    const [post, setPost] = useState(null);
-    const [editing, setEditing] = useState(true);
-    const router = useRouter();
-    const id = router.query;
+function Post() {
+  const [post, setPost] = useState(null)
+  const [editing, setEditing] = useState(true)
+  const router = useRouter()
+  const { id } = router.query
 
-    useEffect(()=>{
-        fetchPost();
-    }, [id])
-
-    async function fetchPost(){
-
-        if(!id) return;
-    
-        let provider;
-        if (process.env.ENVIRONMENT === 'local') {
-          provider = new ethers.providers.JsonRpcProvider()
-        } else if (process.env.ENVIRONMENT === 'testnet') {
-          provider = new ethers.providers.JsonRpcProvider('https://rpc-mumbai.matic.today')
-        } else {
-          provider = new ethers.providers.JsonRpcProvider('https://polygon-rpc.com/')
-        }
-        const contract = new ethers.Contract(contractAddress, Blog.abi, provider);
-        const val = await contract.fetchPost(id);
-        const postId = val[0].toNumber();
-
-        const ipfsUrl = `${ipfsURI}/${id}`;
-        const response = await fetch(ipfsUrl);
-        const data = await response.json();
-        if(data.coverImage){
-            let coverImagePath = `${ipfsUrl}/${data.coverImage}`;
-            data.coverImagePath = coverImagePath;
-        }
-        data.id = postId;
-        setPost(data);
+  useEffect(() => {
+    fetchPost()
+  }, [id])
+  async function fetchPost() {
+    if (!id) return
+    let provider
+    if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'local') {
+      provider = new ethers.providers.JsonRpcProvider()
+    } else if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'testnet') {
+      provider = new ethers.providers.JsonRpcProvider('https://rpc-mumbai.matic.today')
+    } else {
+      provider = new ethers.providers.JsonRpcProvider('https://polygon-rpc.com/')
     }
-
-    async function savePostToIpfs() {
-        try {
-          const added = await client.add(JSON.stringify(post))
-          return added.path
-        } catch (err) {
-          console.log('error: ', err)
-        }
-      }
-
-    async function updatePost(){
-        const hash = await savePostToIpfs();
-        const provider = new ethers.providers.Web3Provider(window.ethereum)
-        const signer = provider.getSigner();
-        const contract = new ethers.Contract(contractAddress, Blog.abi, signer);
-        await contract.updatePost(post.id, post.title, hash, true);
-        router.push("/");
+    const contract = new ethers.Contract(contractAddress, Blog.abi, provider)
+    const val = await contract.fetchPost(id)
+    const postId = val[0].toNumber()
+    const ipfsUrl = `${ipfsURI}/${id}`
+    const response = await fetch(ipfsUrl)
+    const data = await response.json()
+    if(data.coverImage) {
+      let coverImagePath = `${ipfsURI}/${data.coverImage}`
+      data.coverImagePath = coverImagePath
     }
+    data.id = postId;
+    setPost(data)
+  }
 
-    if(!post) return;
+  async function savePostToIpfs() {
+    try {
+      const added = await client.add(JSON.stringify(post))
+      return added.path
+    } catch (err) {
+      console.log('error: ', err)
+    }
+  }
 
-    return (
-        <div className={container}>
-      {editing && (
+  async function updatePost() {
+    const hash = await savePostToIpfs()
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const signer = provider.getSigner()
+    const contract = new ethers.Contract(contractAddress, Blog.abi, signer)
+    await contract.updatePost(post.id, post.title, hash, true)
+    router.push('/')
+  }
+
+  if (!post) return null
+
+  return (
+    <div className={container}>
+      {
+        editing && (
           <div>
             <input
               onChange={e => setPost({ ...post, title: e.target.value })}
@@ -91,8 +88,10 @@ function Post(){
             />
             <button className={button} onClick={updatePost}>Update post</button>
           </div>
-        )}
-      {!editing && (
+        )
+      }
+      {
+        !editing && (
           <div>
             {
               post.coverImagePath && (
@@ -107,7 +106,8 @@ function Post(){
               <ReactMarkdown>{post.content}</ReactMarkdown>
             </div>
           </div>
-        )}
+        )
+      }
       <button className={button} onClick={() => setEditing(editing ? false : true)}>{ editing ? 'View post' : 'Edit post'}</button>
     </div>
   )
@@ -162,4 +162,3 @@ const contentContainer = css`
 `
 
 export default Post;
-  
