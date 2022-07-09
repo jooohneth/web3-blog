@@ -29,4 +29,51 @@ function CreatePost() {
   }, [])
 }
 
+function onChange(e) {
+    setPost(() => ({ ...post, [e.target.name]: e.target.value }))
+  }
+
+  async function createNewPost() {   
+    if (!title || !content) return
+    const hash = await savePostToIpfs()
+    await savePost(hash)
+    router.push(`/`)
+  }
+
+  async function savePostToIpfs() {
+    try {
+      const added = await client.add(JSON.stringify(post))
+      return added.path
+    } catch (err) {
+      console.log('error: ', err)
+    }
+  }
+
+  async function savePost(hash) {
+    if (typeof window.ethereum !== 'undefined') {
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const signer = provider.getSigner()
+      const contract = new ethers.Contract(contractAddress, Blog.abi, signer)
+      console.log('contract: ', contract)
+      try {
+        const val = await contract.createPost(post.title, hash)
+        console.log('val: ', val)
+      } catch (err) {
+        console.log('Error: ', err)
+      }
+    }    
+  }
+
+  function triggerOnChange() {
+    fileRef.current.click()
+  }
+
+  async function handleFileChange (e) {
+    const uploadedFile = e.target.files[0]
+    if (!uploadedFile) return
+    const added = await client.add(uploadedFile)
+    setPost(state => ({ ...state, coverImage: added.path }))
+    setImage(uploadedFile)
+  }
+
 export default CreatePost
