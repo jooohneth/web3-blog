@@ -73,9 +73,44 @@ function Post(){
     if(!post) return;
 
     return (
-        <div></div>
-    )
-
+        <div className={container}>
+      {editing && (
+          <div>
+            <input
+              onChange={e => setPost({ ...post, title: e.target.value })}
+              name='title'
+              placeholder='Give it a title ...'
+              value={post.title}
+              className={titleStyle}
+            />
+            <SimpleMDE
+              className={mdEditor}
+              placeholder="What's on your mind?"
+              value={post.content}
+              onChange={value => setPost({ ...post, content: value })}
+            />
+            <button className={button} onClick={updatePost}>Update post</button>
+          </div>
+        )}
+      {!editing && (
+          <div>
+            {
+              post.coverImagePath && (
+                <img
+                  src={post.coverImagePath}
+                  className={coverImageStyle}
+                />
+              )
+            }
+            <h1>{post.title}</h1>
+            <div className={contentContainer}>
+              <ReactMarkdown>{post.content}</ReactMarkdown>
+            </div>
+          </div>
+        )}
+      <button className={button} onClick={() => setEditing(editing ? false : true)}>{ editing ? 'View post' : 'Edit post'}</button>
+    </div>
+  )
 }
 
 export default Post;
