@@ -8,39 +8,78 @@ import { AccountContext } from '../../context'
 import { contractAddress, ownerAddress } from '../../config'
 import Blog from '../../artifacts/contracts/Blog.sol/Blog.json'
 
-function Post({post}){
-    const account = useContext(AccountContext);
-    const router = useRouter();
-    const {id} = router.query;
-    
-    if(router.isFallback){
-        return <div>Loading...</div>
-    }
+const ipfsURI = 'https://ipfs.io/ipfs/'
 
-    return(
-        <div>
-            {post && (
-                <div className={container}>
-                    {ownerAddress === account && (
-                        <div className={editPost}>
-                            <Link href={`/edit-post/${id}`}>
-                                <a>
-                                    Edit Post
-                                </a>
-                            </Link>
-                        </div>
-                    )}
-                    {post.coverImage && (
-                        <img src={post.coverImage} className={coverImageStyle}/>
-                    )}
-                    <h1>{post.title}</h1>
-                    <div className={contentContainer}>
-                        <ReactMarkdown>{post.content}</ReactMarkdown>
-                    </div>
+function Post({ post }) {
+  const account = useContext(AccountContext)
+  const router = useRouter()
+  const { id } = router.query
+
+  if (router.isFallback) {
+    return <div>Loading...</div>
+  }
+
+  return (
+    <div>
+    {post && (
+        <div className={container}>
+            {ownerAddress === account && (
+                <div className={editPost}>
+                    <Link href={`/edit-post/${id}`}>
+                        <a>
+                            Edit Post
+                        </a>
+                    </Link>
                 </div>
             )}
+            {post.coverImage && (
+                <img src={post.coverImage} className={coverImageStyle}/>
+            )}
+            <h1>{post.title}</h1>
+            <div className={contentContainer}>
+                <ReactMarkdown>{post.content}</ReactMarkdown>
+            </div>
         </div>
-    )
+    )}
+    </div>
+  )
+}
+
+export async function getStaticPaths() {
+  let provider;
+  if (process.env.ENVIRONMENT === 'local') {
+    provider = new ethers.providers.JsonRpcProvider()
+  } else if (process.env.ENVIRONMENT === 'testnet') {
+    provider = new ethers.providers.JsonRpcProvider('https://rpc-mumbai.matic.today')
+  } else {
+    provider = new ethers.providers.JsonRpcProvider('https://polygon-rpc.com/')
+  }
+
+  const contract = new ethers.Contract(contractAddress, Blog.abi, provider)
+  const data = await contract.fetchPosts()
+  const paths = data.map(d => ({ params: { id: d[2] } }))
+
+  return {
+    paths,
+    fallback: true
+  }
+}
+
+export async function getStaticProps({ params }) {
+  const { id } = params
+  const ipfsUrl = `${ipfsURI}/${id}`
+  const response = await fetch(ipfsUrl)
+  const data = await response.json()
+  if(data.coverImage) {
+    let coverImage = `${ipfsURI}/${data.coverImage}`
+    data.coverImage = coverImage
+  }
+
+  return {
+    props: {
+      post: data
+    },
+  }
 }
 
 export default Post;
