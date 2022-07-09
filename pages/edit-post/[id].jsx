@@ -25,6 +25,57 @@ function Post(){
         fetchPost();
     }, [id])
 
+    async function fetchPost(){
+
+        if(!id) return;
+    
+        let provider;
+        if (process.env.ENVIRONMENT === 'local') {
+          provider = new ethers.providers.JsonRpcProvider()
+        } else if (process.env.ENVIRONMENT === 'testnet') {
+          provider = new ethers.providers.JsonRpcProvider('https://rpc-mumbai.matic.today')
+        } else {
+          provider = new ethers.providers.JsonRpcProvider('https://polygon-rpc.com/')
+        }
+        const contract = new ethers.Contract(contractAddress, Blog.abi, provider);
+        const val = await contract.fetchPost(id);
+        const postId = val[0].toNumber();
+
+        const ipfsUrl = `${ipfsURI}/${id}`;
+        const response = await fetch(ipfsUrl);
+        const data = await response.json();
+        if(data.coverImage){
+            let coverImagePath = `${ipfsUrl}/${data.coverImage}`;
+            data.coverImagePath = coverImagePath;
+        }
+        data.id = postId;
+        setPost(data);
+    }
+
+    async function savePostToIpfs() {
+        try {
+          const added = await client.add(JSON.stringify(post))
+          return added.path
+        } catch (err) {
+          console.log('error: ', err)
+        }
+      }
+
+    async function updatePost(){
+        const hash = await savePostToIpfs();
+        const provider = new ethers.providers.Web3Provider(window.ethereum)
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(contractAddress, Blog.abi, signer);
+        await contract.updatePost(post.id, post.title, hash, true);
+        router.push("/");
+    }
+
+    if(!post) return;
+
+    return (
+        <div></div>
+    )
+
 }
 
 export default Post;
