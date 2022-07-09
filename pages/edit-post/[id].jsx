@@ -113,5 +113,53 @@ function Post(){
   )
 }
 
+const button = css`
+  background-color: #fafafa;
+  outline: none;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  margin-right: 10px;
+  margin-top: 15px;
+  font-size: 18px;
+  padding: 16px 70px;
+  box-shadow: 7px 7px rgba(0, 0, 0, .1);
+`
+
+const titleStyle = css`
+  margin-top: 40px;
+  border: none;
+  outline: none;
+  background-color: inherit;
+  font-size: 44px;
+  font-weight: 600;
+  &::placeholder {
+    color: #999999;
+  }
+`
+
+const mdEditor = css`
+  margin-top: 40px;
+`
+
+const coverImageStyle = css`
+  width: 900px;
+`
+
+const container = css`
+  width: 900px;
+  margin: 0 auto;
+`
+
+const contentContainer = css`
+  margin-top: 60px;
+  padding: 0px 40px;
+  border-left: 1px solid #e7e7e7;
+  border-right: 1px solid #e7e7e7;
+  & img {
+    max-width: 900px;
+  }
+`
+
 export default Post;
   
