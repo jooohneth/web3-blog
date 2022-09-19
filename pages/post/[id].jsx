@@ -1,99 +1,99 @@
-import ReactMarkdown from 'react-markdown'
-import { useContext } from 'react'
-import { useRouter } from 'next/router'
-import Link from 'next/link'
-import { css } from '@emotion/css'
-import { ethers } from 'ethers'
-import { AccountContext } from '../../context'
-import { contractAddress, ownerAddress } from '../../config'
-import Blog from '../../artifacts/contracts/Blog.sol/Blog.json'
+import ReactMarkdown from "react-markdown";
+import { useContext } from "react";
+import { useRouter } from "next/router";
+import Link from "next/link";
+import { css } from "@emotion/css";
+import { ethers } from "ethers";
+import { AccountContext } from "../../context";
+import { contractAddress, ownerAddress } from "../../config";
+import Blog from "../../artifacts/contracts/Blog.sol/Blog.json";
 
-const ipfsURI = 'https://ipfs.io/ipfs/'
+const ipfsURI = "https://ipfs.io/ipfs/";
 
 function Post({ post }) {
-  const account = useContext(AccountContext)
-  const router = useRouter()
-  const { id } = router.query
+  const account = useContext(AccountContext);
+  const router = useRouter();
+  const { id } = router.query;
 
   if (router.isFallback) {
-    return <div>Loading...</div>
+    return <div>Loading...</div>;
   }
 
   return (
     <div>
-    {post && (
+      {post && (
         <div className={container}>
-            {ownerAddress === account && (
-                <div className={editPost}>
-                    <Link href={`/edit-post/${id}`}>
-                        <a>
-                            Edit Post
-                        </a>
-                    </Link>
-                </div>
-            )}
-            {post.coverImage && (
-                <img src={post.coverImage} className={coverImageStyle}/>
-            )}
-            <h1>{post.title}</h1>
-            <div className={contentContainer}>
-                <ReactMarkdown>{post.content}</ReactMarkdown>
+          {ownerAddress === account && (
+            <div className={editPost}>
+              <Link href={`/edit-post/${id}`}>
+                <a>Edit Post</a>
+              </Link>
             </div>
+          )}
+          {post.coverImage && (
+            <img src={post.coverImage} className={coverImageStyle} />
+          )}
+          <h1>{post.title}</h1>
+          <div className={contentContainer}>
+            <ReactMarkdown>{post.content}</ReactMarkdown>
+          </div>
         </div>
-    )}
+      )}
     </div>
-  )
+  );
 }
 
 export async function getStaticPaths() {
   let provider;
-  if (process.env.ENVIRONMENT === 'local') {
-    provider = new ethers.providers.JsonRpcProvider()
-  } else if (process.env.ENVIRONMENT === 'testnet') {
-    provider = new ethers.providers.JsonRpcProvider('https://polygon-mumbai.infura.io/v3/42e4bb6840fd45ac87a53be66b381b93')
+  if (process.env.NEXT_PUBLIC_ENVIRONMENT === "local") {
+    provider = new ethers.providers.JsonRpcProvider();
+  } else if (process.env.NEXT_PUBLIC_ENVIRONMENT === "testnet") {
+    provider = new ethers.providers.JsonRpcProvider(
+      process.env.NEXT_PUBLICMUMBAI_RPC
+    );
   } else {
-    provider = new ethers.providers.JsonRpcProvider('https://polygon-rpc.com/')
+    provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com/");
   }
 
-  const contract = new ethers.Contract(contractAddress, Blog.abi, provider)
-  const data = await contract.fetchPosts()
-  const paths = data.map(d => ({ params: { id: d[2] } }))
+  const contract = new ethers.Contract(contractAddress, Blog.abi, provider);
+  const data = await contract.fetchPosts();
+  const paths = data.map((d) => ({ params: { id: d[2] } }));
 
   return {
     paths,
-    fallback: true
-  }
+    fallback: true,
+  };
 }
 
 export async function getStaticProps({ params }) {
-  const { id } = params
-  const ipfsUrl = `${ipfsURI}/${id}`
-  const response = await fetch(ipfsUrl)
-  const data = await response.json()
-  if(data.coverImage) {
-    let coverImage = `${ipfsURI}/${data.coverImage}`
-    data.coverImage = coverImage
+  const { id } = params;
+  const ipfsUrl = `${ipfsURI}/${id}`;
+  const response = await fetch(ipfsUrl);
+  const data = await response.json();
+  if (data.coverImage) {
+    let coverImage = `${ipfsURI}/${data.coverImage}`;
+    data.coverImage = coverImage;
   }
 
   return {
     props: {
-      post: data
+      post: data,
     },
-  }
+  };
 }
 
 const editPost = css`
   margin: 20px 0px;
-`
+`;
 
 const coverImageStyle = css`
   width: 900px;
-`
+`;
 
 const container = css`
   width: 900px;
   margin: 0 auto;
-`
+`;
 
 const contentContainer = css`
   margin-top: 60px;
@@ -103,6 +103,6 @@ const contentContainer = css`
   & img {
     max-width: 900px;
   }
-`
+`;
 
 export default Post;
