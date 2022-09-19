@@ -1,15 +1,27 @@
-# Basic Sample Hardhat Project
+# Web3 Blog
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
+A decentralized blog application deployed on Mumbai Network. Blog posts are stored in IPFS and indexed using Graph Protocol.
 
-Try running some of the following tasks:
+## Commands
 
-```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-node scripts/sample-script.js
-npx hardhat help
+### Install dependencies:
+
+```bash
+  npm install
+```
+
+### Deploy:
+
+Note: contract already deployed to Mumbai Network see config.js file.
+
+### Run tests:
+
+```bash
+  npx hardhat tests
+```
+
+### Run web-app:
+
+```bash
+  npm run dev
 ```
